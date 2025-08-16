@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ludo Ju&Heb — Play</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#391629">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <style>
+    :root{--bg:#391629;--panel:#4a1c37;--muted:#c9c3ca;--text:#fff;--accent:#017b3e;--accent2:#ff0a54;--accent3:#613f75;--accent4:#e85d04;--accent5:#d00000;--accent6:#087e8b;--radius:16px;--shadow:0 10px 30px rgba(0,0,0,.35);--pad:16px;--gap:12px}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{margin:0;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:radial-gradient(120% 120% at 0% 0%,#4a1c37 0%,#391629 40%,#2b1025 100%);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+    header{position:sticky;top:0;z-index:6;padding:calc(env(safe-area-inset-top) + 10px) var(--pad) 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(57,22,41,.7);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(10px)}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{width:34px;height:34px;border-radius:10px;background:conic-gradient(from 180deg,var(--accent),var(--accent2),var(--accent3),var(--accent4),var(--accent5),var(--accent6),var(--accent));box-shadow:var(--shadow)}
+    h1{margin:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;background:#2b1025;border:1px solid rgba(255,255,255,.12)}
+    .countDot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+    .tabs{position:sticky;top:56px;z-index:5;display:flex;gap:10px;padding:8px var(--pad);background:rgba(57,22,41,.75);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(10px)}
+    .tabBtn{flex:1;height:40px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:#2f1430;color:#f2eaf3;font-weight:800;letter-spacing:.2px}
+    .tabBtn.active{background:#3b1840;border-color:rgba(255,255,255,.22)}
+    .container{max-width:820px;margin:0 auto;padding:10px var(--pad) calc(110px + env(safe-area-inset-bottom));display:grid;gap:14px}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow)}
+    h2.sectionTitle{margin:0;padding:12px var(--pad);font-size:14px;color:#f5d9e8;border-bottom:1px solid rgba(255,255,255,.08)}
+    .playWrap{display:grid;gap:14px}
+    @media (min-width:720px){.playWrap{grid-template-columns:1.1fr .9fr}}
+    .stageInner{width:100%;height:min(58vh,420px);height:min(58dvh,420px);border-radius:22px;border:1px dashed rgba(255,255,255,.18);display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,0))}
+    .placeholder{color:#e7cfe0;font-size:14px;padding:0 10px;text-align:center}
+    .big-card{width:92%;height:82%;border-radius:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;box-shadow:0 15px 40px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08);transform:scale(.98);transition:transform .25s ease}
+    .big-card .text{font-size:clamp(22px,6vw,40px);font-weight:900;line-height:1.05;letter-spacing:.2px;color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.45)}
+    .big-card.pulse{animation:pulse .9s ease}
+    @keyframes pulse{0%{transform:scale(.98)}40%{transform:scale(1.02)}100%{transform:scale(1)}}
+    .dicePanel{padding:var(--pad);display:grid;gap:12px}
+    .diceArea{display:grid;gap:10px;place-items:center}
+    .diceRow{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
+    .die{width:min(34vw,150px);height:min(34vw,150px);border-radius:24px;background:radial-gradient(90% 90% at 30% 20%,#ffffff22 0%,#00000022 70%,#00000066 100%),#7b1f57;display:grid;place-items:center;box-shadow:0 16px 40px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08);transform:translateZ(0);position:relative}
+    .die.pip6{background:linear-gradient(135deg,#c01757,#7b1f57)}
+    .die.roll{animation:shake .7s ease}
+    @keyframes shake{10%{transform:rotate(2deg) translate(2px,-2px)}20%{transform:rotate(-2deg) translate(-2px,2px)}30%{transform:rotate(2deg) translate(2px,2px)}40%{transform:rotate(-2deg) translate(-2px,-2px)}50%{transform:rotate(1deg) translate(1px,-1px)}60%{transform:rotate(-1deg) translate(-1px,1px)}100%{transform:none}}
+    .pip{width:18%;aspect-ratio:1;background:#fff;border-radius:50%;box-shadow:0 2px 0 #00000033}
+    .pips{position:absolute;inset:10%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8%}
+    .numDisplay{font-weight:900;font-size:clamp(36px,10vw,64px);color:#fff;text-shadow:0 8px 22px rgba(0,0,0,.45)}
+    .lastRoll{font-size:14px;color:#f2eaf3}
+    .sum{font-weight:800;padding:6px 10px;background:#2f1430;border:1px solid rgba(255,255,255,.14);border-radius:999px}
+    .controlsBar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:10px calc(16px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 10px) calc(16px + env(safe-area-inset-left));background:rgba(42,17,37,.9);backdrop-filter:saturate(1.4) blur(10px);border-top:1px solid rgba(255,255,255,.08)}
+    .controlsBar .row{display:flex;gap:10px}
+    .controlsBar button{flex:1;height:50px;border-radius:14px;border:0;font-weight:900;color:#fff}
+    .btnPrimary{background:linear-gradient(180deg,var(--accent4),#b44a03)}
+    .btnSecondary{background:linear-gradient(180deg,var(--accent6),#085e69)}
+    .btnGhost{background:#2b1025;border:1px solid rgba(255,255,255,.14);color:#fff}
+    .cfgWrap{padding:var(--pad);display:grid;gap:14px}
+    .grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    @media (max-width:460px){.grid2{grid-template-columns:1fr}}
+    label{font-size:12px;color:#f5d9e8}
+    input[type="number"], select{height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:#2f1430;color:#fff;padding:0 12px;font-size:16px}
+    .switch{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#2f1430}
+    .switch input{transform:scale(1.2)}
+    .creator{padding:var(--pad);display:grid;gap:var(--gap)}
+    .creator form{display:grid;gap:var(--gap)}
+    input[type="color"]{width:100%;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:transparent}
+    input[type="text"]{height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#2f1430;color:#fff;padding:0 14px;outline:none;font-size:16px}
+    .gridCards{padding:var(--pad);display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap)}
+    @media (min-width:520px){.gridCards{grid-template-columns:repeat(3,1fr)}}
+    @media (min-width:760px){.gridCards{grid-template-columns:repeat(4,1fr)}}
+    .card{position:relative;border-radius:16px;height:120px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;box-shadow:0 10px 20px rgba(0,0,0,.25),inset 0 0 0 1px rgba(255,255,255,.06);user-select:none}
+    .card .text{color:#fff;font-weight:800;line-height:1.05;text-shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.35);font-size:clamp(12px,3.5vw,16px);word-break:break-word}
+    .del{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(4px)}
+    #iosBanner{position:fixed;left:12px;right:12px;bottom:calc(90px + env(safe-area-inset-bottom));background:#2f1430;border:1px solid rgba(255,255,255,.12);color:#e8edf7;border-radius:14px;padding:12px 14px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none;align-items:center;gap:10px;font-size:14px}
+    #iosBanner .close{margin-left:auto;background:transparent;border:0;color:#fff;font-size:18px;line-height:1;cursor:pointer}
+    #iosBanner small{display:block;color:#f0d7e3;margin-top:4px}
+    :focus-visible{outline:2px solid rgba(255,255,255,.85);outline-offset:2px;border-radius:12px}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1>Ludo Ju&amp;Heb — Play</h1>
+    </div>
+    <div class="pill" aria-live="polite"><span class="countDot"></span><span id="count">0 cartas</span></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button id="tabPlay" class="tabBtn active" role="tab" aria-selected="true" aria-controls="viewPlay">PLAY</button>
+    <button id="tabCfg" class="tabBtn" role="tab" aria-selected="false" aria-controls="viewCfg">Configurações</button>
+  </div>
+
+  <div id="iosBanner">
+    <div>📲 Instale este app</div>
+    <button class="close" aria-label="Fechar">×</button>
+    <small>No iPhone: toque <strong>Compartilhar</strong> → <strong>Adicionar à Tela de Início</strong>.</small>
+  </div>
+
+  <main class="container">
+    <section id="viewPlay" class="playWrap" role="tabpanel" aria-labelledby="tabPlay">
+      <section class="panel" aria-labelledby="stageTitle">
+        <h2 id="stageTitle" class="sectionTitle">Sorteio de Cartas</h2>
+        <div class="stageInner" id="stageInner" role="region" aria-label="Área de sorteio">
+          <div class="placeholder" id="placeholder">Importe/crie cartas e toque <strong>Sortear</strong> 🎲</div>
+        </div>
+      </section>
+
+      <section class="panel dicePanel" aria-labelledby="diceTitle">
+        <h2 id="diceTitle" class="sectionTitle">Dados</h2>
+        <div class="diceArea">
+          <div class="diceRow" id="diceRow"></div>
+          <div class="lastRoll" id="lastRoll">Toque em <strong>Rolar</strong>.</div>
+        </div>
+      </section>
+    </section>
+
+    <section id="viewCfg" class="hidden" role="tabpanel" aria-labelledby="tabCfg">
+      <div class="panel cfgWrap">
+        <h2 class="sectionTitle">Regras dos Dados</h2>
+        <div class="grid2">
+          <div><label for="diceCount">Quantidade de dados</label><select id="diceCount"><option value="1">1 dado</option><option value="2">2 dados</option></select></div>
+          <div><label for="dieSides">Lados por dado</label><select id="dieSides"><option value="4">D4</option><option value="6" selected>D6</option><option value="8">D8</option><option value="10">D10</option><option value="12">D12</option><option value="20">D20</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="switch"><span>Som</span><input id="soundToggle" type="checkbox" checked></div>
+          <div class="switch"><span>Vibração</span><input id="vibrateToggle" type="checkbox" checked></div>
+        </div>
+      </div>
+
+      <section class="panel creator" aria-labelledby="creatorTitle">
+        <h2 id="creatorTitle" class="sectionTitle">Criar/Importar Cartas</h2>
+        <form id="cardForm" autocomplete="off">
+          <div class="grid2">
+            <div><label for="color">Cor da carta</label><input id="color" type="color" value="#ff0a54" aria-label="Escolher cor da carta" /></div>
+            <div><label for="text">Texto (aparece em branco no centro)</label><input id="text" type="text" placeholder="Ex.: Hoje é o seu dia!" maxlength="80" /></div>
+          </div>
+          <div class="grid2">
+            <button type="submit" class="btnPrimary">Adicionar carta</button>
+            <button type="button" id="sampleBtn" class="btnGhost">Exemplos</button>
+          </div>
+          <div class="grid2">
+            <button type="button" id="exportBtn" class="btnSecondary">Exportar baralho</button>
+            <button type="button" id="importBtn" class="btnGhost">Importar baralho</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="listTitle">
+        <h2 id="listTitle" class="sectionTitle">Suas cartas</h2>
+        <div id="grid" class="gridCards" aria-live="polite" aria-busy="false"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="controlsBar" id="controlsBar">
+    <div class="row">
+      <button id="shuffleBtn" class="btnPrimary" title="Sortear carta">Sortear</button>
+      <button id="rollBtn" class="btnSecondary" title="Rolar dados">Rolar</button>
+      <button id="toCfgBtn" class="btnGhost" title="Abrir Configurações">Config</button>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
+    const isIos = () => /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    const isInStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const iosBanner = document.getElementById('iosBanner'); const iosClose = iosBanner.querySelector('.close'); const IOS_BANNER_KEY = 'iosBannerDismissed_v4';
+    function maybeShowIosBanner(){ if (isIos() && !isInStandalone() && !localStorage.getItem(IOS_BANNER_KEY)) iosBanner.style.display = 'flex'; }
+    iosClose.addEventListener('click', ()=>{ iosBanner.style.display='none'; localStorage.setItem(IOS_BANNER_KEY,'1'); });
+    window.addEventListener('load', maybeShowIosBanner);
+
+    const STORAGE_DECK = "ludojuheb_deck_v1";
+    const STORAGE_CFG  = "ludojuheb_cfg_v1";
+    let cards = [];
+    let cfg = { diceCount:1, dieSides:6, sound:true, vibrate:true };
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    function saveDeck(){ localStorage.setItem(STORAGE_DECK, JSON.stringify(cards)); updateCount(); }
+    function loadDeck(){ try{ cards = JSON.parse(localStorage.getItem(STORAGE_DECK)) || []; }catch{ cards=[]; } updateCount(); }
+    function saveCfg(){ localStorage.setItem(STORAGE_CFG, JSON.stringify(cfg)); }
+    function loadCfg(){ try{ Object.assign(cfg, JSON.parse(localStorage.getItem(STORAGE_CFG))||{}); }catch{} }
+
+    function updateCount(){
+      const c = cards.length;
+      document.getElementById('count').textContent = c + (c === 1 ? ' carta' : ' cartas');
+      document.querySelector('.countDot').style.background = c ? '#22c55e' : '#999';
+      document.getElementById('grid').setAttribute('aria-busy','false');
+    }
+    function escapeHTML(str){ return String(str).replace(/[&<>'"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[c])); }
+    function cardEl(card){
+      const el = document.createElement('div'); el.className='card'; el.style.background = card.color;
+      el.innerHTML = `<div class="del" role="button" title="Apagar carta" aria-label="Apagar carta">×</div><div class="text">${escapeHTML(card.text||'')}</div>`;
+      el.querySelector('.del').addEventListener('click', ()=>{ cards = cards.filter(c=>c.id!==card.id); saveDeck(); renderGrid(); });
+      return el;
+    }
+    function renderGrid(){
+      const grid = document.getElementById('grid'); grid.innerHTML = '';
+      if(!cards.length){ grid.innerHTML = '<div style="grid-column:1/-1;color:#f0d7e3;padding:6px 2px">Nenhuma carta. Importe ou crie acima ✨</div>'; return; }
+      const frag = document.createDocumentFragment(); cards.forEach(c => frag.appendChild(cardEl(c))); grid.appendChild(frag);
+    }
+    function renderStagePlaceholder(){ document.getElementById('stageInner').innerHTML = '<div class="placeholder">Importe/crie cartas e toque <strong>Sortear</strong> 🎲</div>'; }
+
+    function showBigCard(card){
+      const stage = document.getElementById('stageInner'); stage.innerHTML = '';
+      const big = document.createElement('div'); big.className = 'big-card pulse'; big.style.background = card.color;
+      big.innerHTML = `<div class="text">${escapeHTML(card.text||'')}</div>`; stage.appendChild(big);
+      sound('card'); vibe(20); setTimeout(()=> big.classList.remove('pulse'), 900);
+    }
+
+    function addCard(text, color){
+      const t = (text||'').trim(); if(!t){ toast('Digite um texto para a carta.'); return; }
+      const id = Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+      cards.push({id,text:t,color: color || '#ff0a54'}); saveDeck(); renderGrid();
+    }
+
+    function sampleCards(){
+      [{text:'Hoje é o seu dia!', color:'#ff0a54'},{text:'Você vai arrasar!', color:'#017b3e'},{text:'Respira. Vai dar certo.', color:'#613f75'},{text:'Liga o modo foco 🔥', color:'#e85d04'},{text:'Beba água agora!', color:'#087e8b'}].forEach(s => addCard(s.text, s.color));
+    }
+
+    function exportDeck(){
+      if(!cards.length){ toast('Nada para exportar.'); return; }
+      const data = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cards, null, 2));
+      const a = document.createElement('a'); a.href = data; a.download = 'cartas.json'; document.body.appendChild(a); a.click(); a.remove();
+    }
+    function importDeck(){
+      const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+      input.onchange = () => {
+        const file = input.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e)=>{
+          try{
+            const imported = JSON.parse(e.target.result);
+            if(!Array.isArray(imported)) throw new Error('formato inválido');
+            cards = imported.map(it => ({ id:(it.id || (Date.now()+Math.random()).toString(36)), text:String(it.text||'').slice(0,120), color:/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(it.color||'')?it.color:pickColor() }));
+            saveDeck(); renderGrid(); renderStagePlaceholder(); toast('Baralho importado!');
+          }catch{ toast('Falha ao importar JSON.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    const palette = ['#017b3e','#ff0a54','#613f75','#e85d04','#d00000','#087e8b'];
+    function pickColor(){ return palette[Math.floor(Math.random()*palette.length)]; }
+
+    function renderDice(){
+      const row = document.getElementById('diceRow'); row.innerHTML='';
+      const count = cfg.diceCount|0; const sides = cfg.dieSides|0;
+      for(let i=0;i<count;i++){
+        const d = document.createElement('div'); d.className='die'; if(sides===6) d.classList.add('pip6');
+        if(sides===6){ const p = document.createElement('div'); p.className='pips'; p.innerHTML = Array.from({length:9}).map(()=>'<div class="slot"></div>').join(''); d.appendChild(p); }
+        else{ const n = document.createElement('div'); n.className='numDisplay'; n.textContent = sides; d.appendChild(n); }
+        row.appendChild(d);
+      }
+    }
+    function setPips(dieEl, value){
+      const p = dieEl.querySelector('.pips'); p.innerHTML='';
+      const positions = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+      (positions[value]||[5]).forEach(idx=>{
+        const pip=document.createElement('div'); pip.className='pip';
+        const row=Math.ceil(idx/3), col=((idx-1)%3)+1; pip.style.gridRow=row; pip.style.gridColumn=col; p.appendChild(pip);
+      });
+    }
+    function rollDice(){
+      const count = cfg.diceCount|0; const sides = cfg.dieSides|0;
+      const dice = Array.from(document.querySelectorAll('.die'));
+      let sum = 0; let values=[];
+      dice.forEach(d=>{ d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); });
+      for(let i=0;i<count;i++){
+        const v = 1 + Math.floor(Math.random()*sides); values.push(v); sum += v;
+        const dieEl = dice[i]; if(sides===6){ setPips(dieEl, v); } else { dieEl.querySelector('.numDisplay').textContent = v; }
+      }
+      document.getElementById('lastRoll').innerHTML = 'Resultado: <strong>'+values.join(' , ')+'</strong> ' + (count>1?'<span class="sum">Soma: '+sum+'</span>':'');
+      sound('dice'); vibe(15);
+    }
+
+    const SFX = {
+      dice: new Audio('data:audio/wav;base64,UklGRoQBAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAAAChAAAAAAAAgP9/f39/f39/f3+AgICAf39/f39/f4CAgIB/f39/f39/gICAQEBBQUFBQUFBQUFBQUFBQf9/f39/f39/fw=='),
+      card: new Audio('data:audio/wav;base64,UklGRoQBAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAAAChAAAAAAAAgP9/f39/f39/f4CAgICAf39/f39/f4CAgIB/f39/f39/gICAQEBBQUFBf39/f39/f39/f39/fw==')
+    };
+    function sound(name){ if(cfg.sound){ try{ SFX[name].currentTime=0; SFX[name].play(); }catch(e){} } }
+    function vibe(ms){ if(cfg.vibrate && navigator.vibrate){ navigator.vibrate(ms); } }
+
+    const tabPlay = document.getElementById('tabPlay'), tabCfg = document.getElementById('tabCfg'), viewPlay = document.getElementById('viewPlay'), viewCfg = document.getElementById('viewCfg');
+    function switchTab(tab){ if(tab==='play'){ tabPlay.classList.add('active'); tabPlay.setAttribute('aria-selected','true'); tabCfg.classList.remove('active'); tabCfg.setAttribute('aria-selected','false'); viewPlay.classList.remove('hidden'); viewCfg.classList.add('hidden'); } else { tabCfg.classList.add('active'); tabCfg.setAttribute('aria-selected','true'); tabPlay.classList.remove('active'); tabPlay.setAttribute('aria-selected','false'); viewCfg.classList.remove('hidden'); viewPlay.classList.add('hidden'); } window.scrollTo({top:0,behavior:'smooth'}); }
+    tabPlay.addEventListener('click', ()=> switchTab('play'));
+    tabCfg.addEventListener('click', ()=> switchTab('cfg'));
+    document.getElementById('toCfgBtn').addEventListener('click', ()=> switchTab('cfg'));
+
+    document.getElementById('shuffleBtn').addEventListener('click', ()=>{
+      if(cards.length===0){ toast('Adicione/importe cartas nas Configurações.'); return; }
+      const cycles = Math.max(18, Math.min(60, 10 + cards.length * 4));
+      let i = 0, lastIdx = -1;
+      const stage = document.getElementById('stageInner'); stage.innerHTML = '';
+      const temp = document.createElement('div'); temp.className='big-card'; temp.style.background='#7b1f57'; temp.innerHTML = '<div class="text" style="opacity:.8">Embaralhando…</div>'; stage.appendChild(temp);
+      const interval = setInterval(()=>{
+        let idx; do{ idx = Math.floor(Math.random() * cards.length); } while(cards.length>1 && idx === lastIdx);
+        lastIdx = idx; const c = cards[idx];
+        temp.style.background = c.color; temp.querySelector('.text').textContent = c.text;
+        i++; temp.style.transform = 'scale('+(0.98 + Math.random()*0.04)+')';
+        if(i >= cycles){ clearInterval(interval); setTimeout(()=> showBigCard(cards[Math.floor(Math.random()*cards.length)]), 140); }
+      }, 90);
+    });
+    document.getElementById('rollBtn').addEventListener('click', rollDice);
+
+    function applyCfgToUI(){
+      document.getElementById('diceCount').value = String(cfg.diceCount);
+      document.getElementById('dieSides').value = String(cfg.dieSides);
+      document.getElementById('soundToggle').checked = !!cfg.sound;
+      document.getElementById('vibrateToggle').checked = !!cfg.vibrate;
+      renderDice();
+    }
+    document.getElementById('diceCount').addEventListener('change', (e)=>{ cfg.diceCount = parseInt(e.target.value,10)||1; saveCfg(); renderDice(); });
+    document.getElementById('dieSides').addEventListener('change', (e)=>{ cfg.dieSides = parseInt(e.target.value,10)||6; saveCfg(); renderDice(); });
+    document.getElementById('soundToggle').addEventListener('change', (e)=>{ cfg.sound = e.target.checked; saveCfg(); });
+    document.getElementById('vibrateToggle').addEventListener('change', (e)=>{ cfg.vibrate = e.target.checked; saveCfg(); });
+
+    document.getElementById('cardForm').addEventListener('submit', (e)=>{ e.preventDefault(); addCard(document.getElementById('text').value, document.getElementById('color').value); document.getElementById('text').value=''; document.getElementById('text').focus(); });
+    document.getElementById('sampleBtn').addEventListener('click', sampleCards);
+    document.getElementById('exportBtn').addEventListener('click', exportDeck);
+    document.getElementById('importBtn').addEventListener('click', importDeck);
+
+    function toast(msg){
+      const t = document.createElement('div'); t.textContent = msg;
+      t.style.cssText = 'position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 18px); background: rgba(0,0,0,.78); color: #fff; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); z-index: 9999; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.35)';
+      document.body.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; }, 1800); setTimeout(()=> t.remove(), 2300);
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{ loadCfg(); loadDeck(); renderGrid(); if(!cards.length) renderStagePlaceholder(); applyCfgToUI(); });
+  </script>
+</body>
+</html>
