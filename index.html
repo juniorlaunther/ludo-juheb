@@ -44,8 +44,17 @@
     .diceArea:active{filter:brightness(1.03)}
     .diceRow{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
     .die{width:min(34vw,150px);height:min(34vw,150px);border-radius:24px;background:linear-gradient(135deg,#c01757,#7b1f57);display:grid;place-items:center;box-shadow:0 16px 40px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08);transform:translateZ(0);position:relative}
-    .die.roll{animation:shake .7s ease}
-    @keyframes shake{10%{transform:rotate(2deg) translate(2px,-2px)}20%{transform:rotate(-2deg) translate(-2px,2px)}30%{transform:rotate(2deg) translate(2px,2px)}40%{transform:rotate(-2deg) translate(-2px,-2px)}50%{transform:rotate(1deg) translate(1px,-1px)}60%{transform:rotate(-1deg) translate(-1px,1px)}100%{transform:none}}
+    /* stronger roll */
+    .die.roll{animation:shakeStrong .9s cubic-bezier(.34,1.56,.3,1)}
+    @keyframes shakeStrong{
+      0%{transform:rotate(0deg) scale(1)}
+      15%{transform:rotate(12deg) translate(4px,-4px) scale(1.06)}
+      30%{transform:rotate(-10deg) translate(-6px,5px) scale(1.03)}
+      45%{transform:rotate(8deg) translate(5px,3px) scale(1.05)}
+      60%{transform:rotate(-6deg) translate(-4px,-3px) scale(1.02)}
+      80%{transform:rotate(3deg) translate(2px,-2px) scale(1.04)}
+      100%{transform:rotate(0deg) scale(1)}
+    }
     .numDisplay{font-weight:900;font-size:clamp(36px,10vw,64px);color:#fff;text-shadow:0 8px 22px rgba(0,0,0,.45)}
     .lastRoll{font-size:14px;color:#f2eaf3}
     .sum{font-weight:800;padding:6px 10px;background:#2f1430;border:1px solid rgba(255,255,255,.14);border-radius:999px}
@@ -58,7 +67,7 @@
     select{height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:#2f1430;color:#fff;padding:0 12px;font-size:16px}
     .creator{padding:var(--pad);display:grid;gap:var(--gap)}
 
-    /* Uniform buttons + spacing fix  */
+    /* Buttons (spacing kept) */
     .btn{height:44px;border-radius:12px;border:0;font-weight:800;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.25);background:linear-gradient(180deg,var(--accent6),#085e69);cursor:pointer}
     .btn:active{transform:translateY(1px)}
     .btnRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
@@ -139,6 +148,11 @@
           <div><label for="diceCount">Quantidade de dados</label><select id="diceCount"><option value="1">1 dado</option><option value="2">2 dados</option></select></div>
           <div><label for="dieSides">Lados por dado</label><select id="dieSides"><option value="4">D4</option><option value="6" selected>D6</option><option value="8">D8</option><option value="10">D10</option><option value="12">D12</option><option value="20">D20</option></select></div>
         </div>
+        <div class="grid2">
+          <div class="switch" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#2f1430">
+            <span>Som</span><input id="soundToggle" type="checkbox" checked>
+          </div>
+        </div>
       </div>
 
       <section class="panel creator" aria-labelledby="creatorTitle">
@@ -171,14 +185,14 @@
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
     const isIos = () => /iphone|ipad|ipod/i.test(window.navigator.userAgent);
     const isInStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    const iosBanner = document.getElementById('iosBanner'); const iosClose = iosBanner.querySelector('.close'); const IOS_BANNER_KEY = 'iosBannerDismissed_v6';
+    const iosBanner = document.getElementById('iosBanner'); const iosClose = iosBanner.querySelector('.close'); const IOS_BANNER_KEY = 'iosBannerDismissed_v7';
     function maybeShowIosBanner(){ if (isIos() && !isInStandalone() && !localStorage.getItem(IOS_BANNER_KEY)) iosBanner.style.display = 'flex'; }
     iosClose.addEventListener('click', ()=>{ iosBanner.style.display='none'; localStorage.setItem(IOS_BANNER_KEY,'1'); });
     window.addEventListener('load', maybeShowIosBanner);
 
     // --- State ---
-    const STORAGE_DECK = "ludojuheb_deck_v3";
-    const STORAGE_CFG  = "ludojuheb_cfg_v3";
+    const STORAGE_DECK = "ludojuheb_deck_v4";
+    const STORAGE_CFG  = "ludojuheb_cfg_v4";
     let cards = [];
     let cfg = { diceCount:1, dieSides:6, sound:true };
 
@@ -262,30 +276,38 @@
       }
     }
     function rollDice(){
+      ensureAC();
       const count = cfg.diceCount|0; const sides = cfg.dieSides|0;
       const dice = Array.from(document.querySelectorAll('.die'));
       let sum = 0; let values=[];
-      dice.forEach(d=>{ d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); });
+      dice.forEach((d,idx)=>{ d.classList.remove('roll'); void d.offsetWidth; d.style.animationDelay = (idx*0.05)+'s'; d.classList.add('roll'); });
+      // fun sfx: três estalos curtos + sweep final
+      sfx('diceStart'); setTimeout(()=>sfx('diceMid'),120); setTimeout(()=>sfx('diceEnd'),260);
       for(let i=0;i<count;i++){
         const v = 1 + Math.floor(Math.random()*sides); values.push(v); sum += v;
         dice[i].querySelector('.numDisplay').textContent = v;
       }
       document.getElementById('lastRoll').innerHTML = 'Resultado: <strong>'+values.join(' , ')+'</strong> ' + (count>1?'<span class="sum">Soma: '+sum+'</span>':'');
-      sfx('dice');
     }
 
     // --- WebAudio SFX ---
     let AC=null;
     function ensureAC(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC && AC.state==='suspended'){ AC.resume(); } }
+    function blip(freqA,freqB,duration){
+      const now = AC.currentTime;
+      const o = AC.createOscillator(); const g = AC.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(freqA, now); o.frequency.exponentialRampToValueAtTime(freqB, now+duration*0.9);
+      g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.35, now+0.02); g.gain.exponentialRampToValueAtTime(0.0001, now+duration);
+      o.connect(g).connect(AC.destination); o.start(now); o.stop(now+duration+0.02);
+    }
     function sfx(kind){
       if(!cfg.sound) return;
       ensureAC(); if(!AC) return;
-      const now = AC.currentTime;
-      const o = AC.createOscillator(); const g = AC.createGain();
-      o.type = 'triangle'; g.gain.setValueAtTime(0.0001, now);
-      if(kind==='dice'){ o.frequency.setValueAtTime(220, now); o.frequency.exponentialRampToValueAtTime(880, now+0.18); g.gain.exponentialRampToValueAtTime(0.3, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.22); }
-      else{ o.frequency.setValueAtTime(660, now); o.frequency.exponentialRampToValueAtTime(440, now+0.15); g.gain.exponentialRampToValueAtTime(0.3, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.2); }
-      o.connect(g).connect(AC.destination); o.start(now); o.stop(now+0.25);
+      if(kind==='card'){ blip(660,440,0.22); }
+      else if(kind==='diceStart'){ blip(220,380,0.12); }
+      else if(kind==='diceMid'){ blip(260,480,0.12); }
+      else if(kind==='diceEnd'){ blip(300,900,0.22); }
+      else { blip(600,420,0.18); }
     }
 
     // --- Modal editor ---
@@ -341,20 +363,15 @@
         if(i >= cycles){ clearInterval(interval); setTimeout(()=> showBigCard(cards[Math.floor(Math.random()*cards.length)]), 140); }
       }, 90);
     });
-    document.getElementById('diceArea').addEventListener('click', ()=>{ ensureAC(); rollDice(); });
+    document.getElementById('diceArea').addEventListener('click', ()=>{ rollDice(); });
     document.getElementById('stageInner').addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); document.getElementById('stageInner').click(); }});
     document.getElementById('diceArea').addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); document.getElementById('diceArea').click(); }});
 
     // --- Config bindings ---
-    function applyCfgToUI(){ document.getElementById('diceCount').value = String(cfg.diceCount); document.getElementById('dieSides').value = String(cfg.dieSides); renderDice(); }
+    function applyCfgToUI(){ document.getElementById('diceCount').value = String(cfg.diceCount); document.getElementById('dieSides').value = String(cfg.dieSides); document.getElementById('soundToggle').checked = !!cfg.sound; renderDice(); }
     document.getElementById('diceCount').addEventListener('change', (e)=>{ cfg.diceCount = parseInt(e.target.value,10)||1; saveCfg(); renderDice(); });
     document.getElementById('dieSides').addEventListener('change', (e)=>{ cfg.dieSides = parseInt(e.target.value,10)||6; saveCfg(); renderDice(); });
-
-    // Creator
-    document.getElementById('cardForm').addEventListener('submit', (e)=>{ e.preventDefault(); addCard(document.getElementById('text').value, document.getElementById('color').value); document.getElementById('text').value=''; document.getElementById('text').focus(); });
-    document.getElementById('sampleBtn').addEventListener('click', sampleCards);
-    document.getElementById('exportBtn').addEventListener('click', exportDeck);
-    document.getElementById('importBtn').addEventListener('click', importDeck);
+    document.getElementById('soundToggle').addEventListener('change', (e)=>{ cfg.sound = e.target.checked; saveCfg(); });
 
     // Toast
     function toast(msg){
